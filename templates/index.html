@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}All Events - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4">
+                <i data-feather="calendar" class="me-3"></i>
+                Events
+            </h1>
+            {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('create_event') }}" class="btn btn-primary btn-lg">
+                    <i data-feather="plus" class="me-2"></i>
+                    Create Event
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Search and Filter Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('index') }}" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">Search Events</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search }}" placeholder="Search by name, description, or location">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Filter by Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Events</option>
+                            <option value="upcoming" {% if status_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                            <option value="ongoing" {% if status_filter == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i data-feather="search" class="me-1"></i>
+                            Search
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i data-feather="x" class="me-1"></i>
+                            Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Events List -->
+        {% if events %}
+            <div class="row">
+                {% for event in events %}
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">{{ event.name }}</h5>
+                                {% if event.status == 'upcoming' %}
+                                    <span class="badge bg-primary">Upcoming</span>
+                                {% elif event.status == 'ongoing' %}
+                                    <span class="badge bg-success">Ongoing</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Completed</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if event.description %}
+                                    <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                                {% endif %}
+                                
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i data-feather="calendar" width="16" height="16" class="me-1"></i>
+                                        {{ event.date.strftime('%B %d, %Y') }}
+                                    </small>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i data-feather="clock" width="16" height="16" class="me-1"></i>
+                                        {{ event.time.strftime('%I:%M %p') }}
+                                    </small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i data-feather="map-pin" width="16" height="16" class="me-1"></i>
+                                        {{ event.location }}
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Attendees:</small>
+                                        <span class="badge bg-info">{{ event.attendee_count }}/{{ event.max_attendees }}</span>
+                                    </div>
+                                    {% if event.max_attendees > 0 %}
+                                        <div class="progress mt-1" style="height: 6px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ (event.attendee_count / event.max_attendees * 100) }}%"></div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('event_detail', id=event.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i data-feather="eye" width="16" height="16" class="me-1"></i>
+                                        View
+                                    </a>
+                                    {% if current_user.is_authenticated and current_user.is_admin %}
+                                        <a href="{{ url_for('edit_event', id=event.id) }}" class="btn btn-sm btn-outline-secondary">
+                                            <i data-feather="edit-2" width="16" height="16" class="me-1"></i>
+                                            Edit
+                                        </a>
+                                    {% endif %}
+                                    {% if current_user.is_authenticated and event.status != 'completed' and event.available_spots > 0 %}
+                                        <a href="{{ url_for('register_for_event', id=event.id) }}" class="btn btn-sm btn-success ms-auto">
+                                            <i data-feather="user-plus" width="16" height="16" class="me-1"></i>
+                                            Register
+                                        </a>
+                                    {% elif not current_user.is_authenticated %}
+                                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-info ms-auto">
+                                            <i data-feather="log-in" width="16" height="16" class="me-1"></i>
+                                            Login to Register
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i data-feather="calendar-x" width="64" height="64" class="text-muted mb-3"></i>
+                <h3 class="text-muted">No events found</h3>
+                <p class="text-muted mb-4">
+                    {% if search or status_filter != 'all' %}
+                        No events match your search criteria.
+                    {% else %}
+                        Get started by creating your first event.
+                    {% endif %}
+                </p>
+                {% if not search and status_filter == 'all' %}
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                        <a href="{{ url_for('create_event') }}" class="btn btn-primary">
+                            <i data-feather="plus" class="me-2"></i>
+                            Create First Event
+                        </a>
+                    {% elif not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">
+                            <i data-feather="user-plus" class="me-2"></i>
+                            Register to Browse Events
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

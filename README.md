@@ -70,3 +70,4 @@ Remove-Item -Recurse -Force .venv
 uv pip install -r pyproject.toml
 python main.py# Event_Management_System
 # Event_Management_System
+# Event_Management

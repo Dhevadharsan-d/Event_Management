@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.name }} - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Event Details Card -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">{{ event.name }}</h2>
+                {% if event.status == 'upcoming' %}
+                    <span class="badge bg-primary fs-6">Upcoming</span>
+                {% elif event.status == 'ongoing' %}
+                    <span class="badge bg-success fs-6">Ongoing</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6">Completed</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if event.description %}
+                    <p class="card-text">{{ event.description }}</p>
+                {% endif %}
+
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <h6 class="text-muted">
+                            <i data-feather="calendar" class="me-2"></i>
+                            Date
+                        </h6>
+                        <p>{{ event.date.strftime('%A, %B %d, %Y') }}</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <h6 class="text-muted">
+                            <i data-feather="clock" class="me-2"></i>
+                            Time
+                        </h6>
+                        <p>{{ event.time.strftime('%I:%M %p') }}</p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-muted">
+                        <i data-feather="map-pin" class="me-2"></i>
+                        Location
+                    </h6>
+                    <p>{{ event.location }}</p>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-muted">
+                        <i data-feather="users" class="me-2"></i>
+                        Attendance
+                    </h6>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="me-3">{{ event.attendee_count }} / {{ event.max_attendees }} registered</span>
+                        {% if event.available_spots > 0 %}
+                            <span class="badge bg-success">{{ event.available_spots }} spots available</span>
+                        {% else %}
+                            <span class="badge bg-warning">Full</span>
+                        {% endif %}
+                    </div>
+                    {% if event.max_attendees > 0 %}
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ (event.attendee_count / event.max_attendees * 100) }}%"
+                                 aria-valuenow="{{ event.attendee_count }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="{{ event.max_attendees }}">
+                                {{ "%.0f"|format(event.attendee_count / event.max_attendees * 100) }}%
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Created {{ event.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        {% if event.updated_at != event.created_at %}
+                            | Last updated {{ event.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Action Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if current_user.is_authenticated and event.status != 'completed' and event.available_spots > 0 %}
+                        <a href="{{ url_for('register_for_event', id=event.id) }}" class="btn btn-success">
+                            <i data-feather="user-plus" class="me-2"></i>
+                            Register for Event
+                        </a>
+                    {% elif not current_user.is_authenticated %}
+                        <a href="{{ url_for('login') }}" class="btn btn-info">
+                            <i data-feather="log-in" class="me-2"></i>
+                            Login to Register
+                        </a>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                        <a href="{{ url_for('edit_event', id=event.id) }}" class="btn btn-outline-primary">
+                            <i data-feather="edit-2" class="me-2"></i>
+                            Edit Event
+                        </a>
+                        
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i data-feather="trash-2" class="me-2"></i>
+                            Delete Event
+                        </button>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i data-feather="arrow-left" class="me-2"></i>
+                        Back to Events
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendees Card -->
+        {% if event.attendees %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i data-feather="users" class="me-2"></i>
+                        Registered Attendees ({{ event.attendee_count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for attendee in event.attendees %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 {% if not loop.last %}border-bottom{% endif %}">
+                            <div>
+                                <strong>{{ attendee.name }}</strong><br>
+                                <small class="text-muted">{{ attendee.email }}</small>
+                                {% if attendee.phone %}
+                                    <br><small class="text-muted">{{ attendee.phone }}</small>
+                                {% endif %}
+                                <br><small class="text-muted">Registered: {{ attendee.registered_at.strftime('%m/%d/%Y') }}</small>
+                            </div>
+                            {% if current_user.is_authenticated and current_user.is_admin %}
+                                <form method="POST" action="{{ url_for('remove_attendee', event_id=event.id, attendee_id=attendee.id) }}" 
+                                      style="display: inline;" onsubmit="return confirm('Remove this attendee?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i data-feather="user-minus" width="16" height="16"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the event <strong>"{{ event.name }}"</strong>?</p>
+                <p class="text-muted">This action cannot be undone. All attendee registrations will also be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('delete_event', id=event.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Event</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

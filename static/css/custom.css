@@ -1,0 +1,287 @@
+/* Custom CSS for Event Management System */
+
+/* Use CSS variables for consistent theming */
+:root {
+    --event-card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --event-card-hover-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --border-radius-lg: 0.5rem;
+}
+
+/* Custom card styles */
+.card {
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--event-card-shadow);
+    transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: var(--event-card-hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Progress bar styling */
+.progress {
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out;
+}
+
+/* Event status badges */
+.badge {
+    font-size: 0.75em;
+    font-weight: 500;
+}
+
+/* Form enhancements */
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Navigation enhancements */
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--bs-primary) !important;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Alert enhancements */
+.alert {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    font-weight: 500;
+}
+
+.alert-dismissible .btn-close {
+    padding: 0.75rem;
+}
+
+/* Empty state styling */
+.text-center .feather {
+    opacity: 0.5;
+}
+
+/* Modal enhancements */
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Table responsiveness */
+.table-responsive {
+    border-radius: var(--border-radius-lg);
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.7;
+    transform: none !important;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Search form enhancements */
+.form-control[type="search"] {
+    padding-right: 2.5rem;
+}
+
+/* Toast styling */
+.toast-container {
+    z-index: 1055;
+}
+
+.toast {
+    border-radius: var(--border-radius-lg);
+}
+
+/* Attendee list styling */
+.border-bottom:last-child {
+    border-bottom: none !important;
+}
+
+/* Card header with actions */
+.card-header {
+    font-weight: 600;
+}
+
+.card-header .badge {
+    font-size: 0.875em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.gap-2 > * {
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.gap-2 > *:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .btn,
+    .modal,
+    .toast-container,
+    .alert-dismissible .btn-close {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+    
+    .card:hover {
+        transform: none !important;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    
+    .display-4 {
+        font-size: 18pt;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+}
+
+/* Focus indicators for accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid var(--bs-border-color);
+    }
+    
+    .btn {
+        border-width: 2px;
+    }
+    
+    .badge {
+        border: 1px solid currentColor;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .btn,
+    .progress-bar,
+    .navbar-nav .nav-link {
+        transition: none;
+    }
+    
+    .card:hover {
+        transform: none;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+}

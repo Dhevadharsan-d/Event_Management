@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Register for {{ event.name }} - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Event Summary Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="calendar" class="me-2"></i>
+                    {{ event.name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <i data-feather="calendar" width="16" height="16" class="me-2"></i>
+                            <strong>Date:</strong> {{ event.date.strftime('%A, %B %d, %Y') }}
+                        </p>
+                        <p class="mb-2">
+                            <i data-feather="clock" width="16" height="16" class="me-2"></i>
+                            <strong>Time:</strong> {{ event.time.strftime('%I:%M %p') }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <i data-feather="map-pin" width="16" height="16" class="me-2"></i>
+                            <strong>Location:</strong> {{ event.location }}
+                        </p>
+                        <p class="mb-2">
+                            <i data-feather="users" width="16" height="16" class="me-2"></i>
+                            <strong>Available Spots:</strong> 
+                            <span class="badge bg-success">{{ event.available_spots }}</span>
+                        </p>
+                    </div>
+                </div>
+                {% if event.description %}
+                    <div class="mt-3">
+                        <p class="text-muted">{{ event.description }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Registration Form Card -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="user-plus" class="me-2"></i>
+                    Register for Event
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Enter your full name") }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                        <div class="form-text">Using your account email: {{ current_user.email }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.phone.label(class="form-label") }}
+                        {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="Enter your phone number (optional)") }}
+                        {% if form.phone.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Optional. We may use this for important event notifications.</div>
+                    </div>
+
+                    {% if event.available_spots <= 5 and event.available_spots > 0 %}
+                        <div class="alert alert-warning">
+                            <i data-feather="alert-triangle" class="me-2"></i>
+                            <strong>Hurry!</strong> Only {{ event.available_spots }} spots remaining for this event.
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        {{ form.submit(class="btn btn-success btn-lg") }}
+                        <a href="{{ url_for('event_detail', id=event.id) }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-1"></i>
+                            Back to Event
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions -->
+        <div class="mt-4 text-center">
+            <small class="text-muted">
+                By registering for this event, you agree to receive event-related communications 
+                and understand that your registration may be cancelled if the event is cancelled or postponed.
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

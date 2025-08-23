@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Event Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- User Info Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="user" class="me-2"></i>
+                    User Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <p class="form-control-plaintext">{{ user.username }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <p class="form-control-plaintext">{{ user.email }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Account Type</label>
+                    <p class="form-control-plaintext">
+                        {% if user.is_admin %}
+                            <span class="badge bg-primary">Administrator</span>
+                        {% else %}
+                            <span class="badge bg-secondary">User</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Member Since</label>
+                    <p class="form-control-plaintext">{{ user.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- User Activity Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="activity" class="me-2"></i>
+                    Your Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_admin %}
+                    <!-- Admin Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ user.events|length }}</h3>
+                                <p class="text-muted">Events Created</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ user.events|selectattr('status', 'equalto', 'upcoming')|list|length }}</h3>
+                                <p class="text-muted">Upcoming Events</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-info">
+                                    {% set total_attendees = user.events|sum(attribute='attendee_count') %}
+                                    {{ total_attendees }}
+                                </h3>
+                                <p class="text-muted">Total Registrations</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if user.events %}
+                        <h6>Your Recent Events</h6>
+                        {% for event in user.events[:5] %}
+                            <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                                <div>
+                                    <strong>{{ event.name }}</strong><br>
+                                    <small class="text-muted">{{ event.date.strftime('%B %d, %Y') }}</small>
+                                </div>
+                                <div class="text-end">
+                                    {% if event.status == 'upcoming' %}
+                                        <span class="badge bg-primary">Upcoming</span>
+                                    {% elif event.status == 'ongoing' %}
+                                        <span class="badge bg-success">Ongoing</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Completed</span>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">{{ event.attendee_count }} registered</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="calendar-x" width="48" height="48" class="text-muted mb-3"></i>
+                            <p class="text-muted">You haven't created any events yet.</p>
+                            <a href="{{ url_for('create_event') }}" class="btn btn-primary">Create Your First Event</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- User Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ user.registrations|length }}</h3>
+                                <p class="text-muted">Events Registered</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h3 class="text-info">{{ user.registrations|selectattr('event.status', 'equalto', 'upcoming')|list|length }}</h3>
+                                <p class="text-muted">Upcoming Events</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if user.registrations %}
+                        <h6>Your Event Registrations</h6>
+                        {% for registration in user.registrations %}
+                            <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                                <div>
+                                    <strong>{{ registration.event.name }}</strong><br>
+                                    <small class="text-muted">{{ registration.event.date.strftime('%B %d, %Y') }} at {{ registration.event.time.strftime('%I:%M %p') }}</small>
+                                </div>
+                                <div class="text-end">
+                                    {% if registration.event.status == 'upcoming' %}
+                                        <span class="badge bg-primary">Upcoming</span>
+                                    {% elif registration.event.status == 'ongoing' %}
+                                        <span class="badge bg-success">Ongoing</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Completed</span>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">Registered {{ registration.registered_at.strftime('%m/%d/%Y') }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="calendar" width="48" height="48" class="text-muted mb-3"></i>
+                            <p class="text-muted">You haven't registered for any events yet.</p>
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">Browse Events</a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
